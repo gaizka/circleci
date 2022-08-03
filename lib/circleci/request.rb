@@ -48,8 +48,8 @@ module CircleCi
     end
 
     def connection(verb, body = {})
-      req = Net::HTTP.const_get(verb.to_s.capitalize, false).new(@uri, DEFAULT_HEADERS)
-      req.body = JSON.dump(body)
+      req = Net::HTTP.const_get(verb.to_s.capitalize, false).new(@uri, DEFAULT_HEADERS.merge("Circle-Token" => @config.token))
+      req.body = JSON.dump(body) if body.size > 0
       req
     end
 
@@ -64,8 +64,9 @@ module CircleCi
     def build_uri(path, params = {})
       uri = @config.uri
       uri.path += path
-      params['circle-token'] = @config.token
-      uri.query = URI.encode_www_form(params)
+      if params.size > 0
+        uri.query = URI.encode_www_form(params)
+      end
       uri
     end
 
